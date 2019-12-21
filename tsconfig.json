@@ -1,0 +1,32 @@
+// 具体参数涵义请参考文档
+// https://www.typescriptlang.org/docs/handbook/compiler-options.html
+{
+	"compilerOptions": {
+		"strict": true,
+		"allowSyntheticDefaultImports": true,
+		"lib": [
+			"dom",
+			"es5",
+			"es2015"
+			// "es2015.promise"
+		],
+		// "resolveJsonModule": true, 
+		// "esModuleInterop": true,
+		"target": "es5",
+		"module": "es2015",
+		"moduleResolution": "node",
+		"isolatedModules": false,
+		"noUnusedLocals": true,
+		"allowJs": true,
+		"experimentalDecorators": true,
+    "suppressImplicitAnyIndexErrors": true
+	},
+	"declaration": true, // 生成 `.d.ts` 文件
+	"outDir": "./dist",
+	"paths": {
+		"@/*": ["./src/*"]
+	},
+	// "include": [
+	// 	"./src/**/*.ts"
+	// ]
+}

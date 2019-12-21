@@ -1,0 +1,15 @@
+// 详细规则参照：https://palantir.github.io/tslint/rules/
+{
+  "extends": "tslint:recommended", // 暂时是比较标准的
+  "globals": {
+      "require": true
+  },
+  "rules": {
+      "no-var-keyword": true, // 不允许使用var
+      "no-consecutive-blank-lines": false, // 关闭连续空行限制
+      "quotemark": [true, "single"] // script部分使用单引号规则
+      "member-access": [true, "no-public"],
+      "ordered-imports": false, // 关闭import按字母排序
+      "no-console": false // 关闭console警告
+  }
+}

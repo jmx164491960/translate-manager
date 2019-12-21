@@ -84,21 +84,9 @@ var TranslateManager = /** @class */ (function () {
         Storage.set(this.STORAGE_KEY, storageData);
     };
     /**
-     * 获取前端的静态国际化数据
-     * @param {String} language 语种
-     */
-    TranslateManager.prototype.getFETranslateData = function (language) {
-        if (!language) {
-            return this.staticTranslateData;
-        }
-        else {
-            return this.staticTranslateData[language];
-        }
-    };
-    /**
      * 获取后端的静态国际化数据
      */
-    TranslateManager.prototype.getBETranslateData = function (language) {
+    TranslateManager.prototype.getDynamicTranslateData = function (language) {
         var storageData = Storage.getJsonData(this.STORAGE_KEY);
         // 有缓存就读取缓存
         if (storageData && storageData['time'] && storageData[language]) {
@@ -117,10 +105,10 @@ var TranslateManager = /** @class */ (function () {
      * 获取前后端交集后的国际化数据
      * @param {*} language
      */
-    TranslateManager.prototype.getMixTranslateData = function (language) {
+    TranslateManager.prototype.getMergeTranslateData = function (language) {
         var _this = this;
         // 没缓存就发起请求
-        return this.getBETranslateData(language).then(function (res) {
+        return this.getDynamicTranslateData(language).then(function (res) {
             var data = _this.staticTranslateData[language];
             if (!data) {
                 return Promise.reject();
@@ -134,24 +122,29 @@ var TranslateManager = /** @class */ (function () {
     };
     /**
      * 主方法
+     * @param locale 语种
+     * @param callback 回调函数，用于订制自己触发的渲染逻辑
      */
-    TranslateManager.prototype.update = function (locale, handler) {
+    TranslateManager.prototype.update = function (locale, callback) {
         var _this = this;
-        return this.getMixTranslateData(locale)
+        // 返回静态和动态数据的合集
+        return this.getMergeTranslateData(locale)
             .then(function (res) {
             if (!isEmptyResult(res.data)) {
-                // 国际化初始化
-                handler(res);
+                // 首次更新
+                callback(res, 'first');
                 // 是否使用缓存
                 if (res.isCache) {
                     _this.isNeedUpdate(locale).then(function (needUpdate) {
+                        // 是否需要更新
                         if (!needUpdate) {
                             return;
                         }
-                        _this.getMixTranslateData(locale).then(function (res) {
+                        _this.getMergeTranslateData(locale).then(function (res) {
                             // 缓存更新进行中
                             if (!isEmptyResult(res.data)) {
-                                handler(res);
+                                // 第二次更新
+                                callback(res, 'second');
                             }
                         });
                     });

@@ -107,20 +107,9 @@ export default class TranslateManager {
     Storage.set(this.STORAGE_KEY, storageData);
   } 
   /**
-   * 获取前端的静态国际化数据
-   * @param {String} language 语种
-   */
-  getFETranslateData(language: string): object {
-    if (!language) {
-      return this.staticTranslateData;
-    } else {
-      return this.staticTranslateData[language];
-    }
-  }
-  /**
    * 获取后端的静态国际化数据
    */
-  getBETranslateData(language: string) {
+  getDynamicTranslateData(language: string) {
     const storageData = Storage.getJsonData(this.STORAGE_KEY);
     // 有缓存就读取缓存
     if (storageData && storageData['time'] && storageData[language]) {
@@ -138,9 +127,9 @@ export default class TranslateManager {
    * 获取前后端交集后的国际化数据
    * @param {*} language 
    */
-  getMixTranslateData(language: string) {
+  getMergeTranslateData(language: string) {
     // 没缓存就发起请求
-    return this.getBETranslateData(language).then((res: any) => {
+    return this.getDynamicTranslateData(language).then((res: any) => {
 
       const data = this.staticTranslateData[language];
       if (!data) {
@@ -155,24 +144,28 @@ export default class TranslateManager {
   }
   /**
    * 主方法
+   * @param locale 语种
+   * @param callback 回调函数，用于订制自己触发的渲染逻辑
    */
-  update(locale: string, handler: Function) {
-    return this.getMixTranslateData(locale)
+  update(locale: string, callback: Function) {
+    // 返回静态和动态数据的合集
+    return this.getMergeTranslateData(locale)
     .then((res: translateDataRes) => {
       if (!isEmptyResult(res.data)) {
-        
-        // 国际化初始化
-        handler(res);
+        // 首次更新
+        callback(res, 'first');
         // 是否使用缓存
         if (res.isCache) {
           this.isNeedUpdate(locale).then((needUpdate: Boolean) => {
+            // 是否需要更新
             if (!needUpdate) {
               return;
             }
-            this.getMixTranslateData(locale).then((res: translateDataRes) => {
+            this.getMergeTranslateData(locale).then((res: translateDataRes) => {
               // 缓存更新进行中
               if (!isEmptyResult(res.data)) {
-                handler(res);
+                // 第二次更新
+                callback(res, 'second');
               }
             });
           });

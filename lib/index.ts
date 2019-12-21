@@ -1,29 +1,8 @@
-import Storage from './utils/localStorage';
-/**
- * 判断是否为falsy值/空数组/空对象
- * @param data
- * @returns {boolean}
- */
-function isEmptyResult(data: any): Boolean {
-  // Object.keys(data).length === 0
-  // 判断假值（除0外）和空数组/对象
-  if (!data && data !== 0 && data !== false) {
-    return true
-  }
+import {
+  isEmptyResult,
+  jsonParse
+} from './utils';
 
-  // 判断时间
-  if (data instanceof Date) {
-    return false
-  }
-
-  if (Array.isArray(data) && data.length === 0) {
-    return true
-  } else if (Object.prototype.isPrototypeOf(data) && Object.keys(data).length === 0) {
-    return true
-  }
-
-  return false
-}
 /**
  * 返回的结果
  */
@@ -83,7 +62,7 @@ export default class TranslateManager {
    * @param {*} language 
    */
   isNeedUpdate(language: string): Promise<Boolean> {
-    const storageData = Storage.getJsonData(this.STORAGE_KEY) || {};
+    const storageData = jsonParse(localStorage.getItem(this.STORAGE_KEY)) || {};
     const cacheData = storageData[language];
     return this.getRequestData(language).then((res: object) => {
       if (JSON.stringify(res) === JSON.stringify(cacheData)) {
@@ -101,16 +80,16 @@ export default class TranslateManager {
    */
   setCache(language: string, data: object) {
     // 请求完成后缓存
-    const storageData = Storage.getJsonData(this.STORAGE_KEY) || {};
+    const storageData = jsonParse(localStorage.getItem(this.STORAGE_KEY)) || {};
     storageData[language] = data;
     storageData['time'] = new Date().getTime();
-    Storage.set(this.STORAGE_KEY, storageData);
+    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(storageData));
   } 
   /**
    * 获取后端的静态国际化数据
    */
   getDynamicTranslateData(language: string) {
-    const storageData = Storage.getJsonData(this.STORAGE_KEY);
+    const storageData = jsonParse(localStorage.getItem(this.STORAGE_KEY)) || {};
     // 有缓存就读取缓存
     if (storageData && storageData['time'] && storageData[language]) {
       const time = storageData['time'];

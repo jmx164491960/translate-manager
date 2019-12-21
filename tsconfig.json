@@ -2,7 +2,7 @@
 // https://www.typescriptlang.org/docs/handbook/compiler-options.html
 {
 	"compilerOptions": {
-		"strict": true,
+		// "strict": true,
 		"allowSyntheticDefaultImports": true,
 		"lib": [
 			"dom",

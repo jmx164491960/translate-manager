@@ -17,6 +17,7 @@
 
 <script>
 import translateManager from './translateManager.js';
+
 export default {
   name: 'App',
   data() {

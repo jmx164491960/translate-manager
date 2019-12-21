@@ -61,5 +61,17 @@
     "> 1%",
     "last 2 versions",
     "not ie <= 8"
-  ]
+  ],
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmx164491960/translate-manager.git",
+    "bugs": {
+      "url": "https://github.com/jmx164491960/translate-manager/issues"
+    },
+    "homepage": "https://github.com/jmx164491960/translate-manager#readme"
+  }
 }

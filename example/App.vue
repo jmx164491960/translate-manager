@@ -17,6 +17,7 @@
 
 <script>
 import translateManager from './translateManager.js';
+import staticTranslateData from './staticTranslateData';
 
 export default {
   name: 'App',
@@ -28,6 +29,9 @@ export default {
   },
   created() {
     this.language = window.language;
+
+    this.translateData = staticTranslateData[this.language]['namespace1'];
+    console.log('staticTranslateData[this.language]:', staticTranslateData[this.language]);
     translateManager.update(this.language, (res) => {
       this.translateData = res.data['namespace1'];
     })

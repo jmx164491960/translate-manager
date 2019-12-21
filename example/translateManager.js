@@ -1,4 +1,5 @@
 import TranslateManager from '../lib/index';
+import staticTranslateData from './staticTranslateData';
 window.language = window.language || 'cn';
 
 const translateManager = new TranslateManager({
@@ -6,18 +7,7 @@ const translateManager = new TranslateManager({
   storageKey: 'translateManagerDemo',
 
   // 静态数据
-  staticTranslateData:{
-    en: {
-      namespace1: {
-        button: 'Button'
-      }
-    },
-    cn: {
-      namespace1: {
-        button: '按钮'
-      }
-    }
-  },
+  staticTranslateData,
 
   // 动态数据，通过接口返回
   requestFn: () => {

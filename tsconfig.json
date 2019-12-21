@@ -10,8 +10,9 @@
 			"es2015"
 			// "es2015.promise"
 		],
-		// "resolveJsonModule": true, 
-		// "esModuleInterop": true,
+		"declaration": true, // 生成 `.d.ts` 文件
+		"resolveJsonModule": true, 
+		"esModuleInterop": true,
 		"target": "es5",
 		"module": "es2015",
 		"moduleResolution": "node",
@@ -19,14 +20,13 @@
 		"noUnusedLocals": true,
 		"allowJs": true,
 		"experimentalDecorators": true,
-    "suppressImplicitAnyIndexErrors": true
+		"suppressImplicitAnyIndexErrors": true,
+		"outDir": "./dist",
 	},
-	"declaration": true, // 生成 `.d.ts` 文件
-	"outDir": "./dist",
 	"paths": {
 		"@/*": ["./src/*"]
 	},
-	// "include": [
-	// 	"./src/**/*.ts"
-	// ]
+	"include": [
+		"./lib/*.ts"
+	]
 }

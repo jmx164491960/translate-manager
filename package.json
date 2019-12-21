@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "translate-manager",
   "author": "jiangminxi <jiangminxi@banggood.com>",
-  "private": true,
+  "private": false,
   "scripts": {
     "example": "webpack-dev-server --inline --progress --config build/webpack.dev.conf.js",
     "build": "tsc"

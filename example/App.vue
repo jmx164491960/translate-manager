@@ -29,10 +29,8 @@ export default {
   },
   created() {
     this.language = window.language;
-    delete localStorage.translateManagerDemo
-    
     translateManager.update(this.language, (res) => {
-      this.translateData = res.data['namespace1'];
+      this.translateData = res['namespace1'];
     })
   },
   methods: {
@@ -40,7 +38,7 @@ export default {
       window.language = window.language === 'cn' ? 'en' : 'cn';
       this.language = window.language;
       translateManager.update(this.language, (res) => {
-        this.translateData = res.data['namespace1'];
+        this.translateData = res['namespace1'];
       })
     }
   }

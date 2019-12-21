@@ -30,9 +30,7 @@ const translateManager = new TranslateManager({
       }
 
       setTimeout(() => {
-        resolve({
-          data
-        })
+        resolve(data)
       }, 1000);
     })
   }

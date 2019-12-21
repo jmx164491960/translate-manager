@@ -3,14 +3,7 @@ import {
   jsonParse,
   isEqual
 } from './utils';
-
-/**
- * 返回的结果
- */
-interface translateDataRes {
-  isCache: Boolean,
-  data: object
-}
+import merge from 'lodash/merge';
 
 /**
  * 构造函数入参
@@ -66,8 +59,7 @@ export default class TranslateManager {
       const now = new Date().getTime();
       // 缓存只有两小时
       if (now - time <= this.expireTime) {
-        if (storageData[language]) storageData[language]['isCache'] = true; // 打上是否使用缓存的标志
-        return storageData[language];
+        return storageData[language] || null;
       }
     }
     return null;
@@ -95,32 +87,41 @@ export default class TranslateManager {
 
       const data = this.staticTranslateData[language] || {};
       // 部分国际化写在了前端，把前端的国际化文件合并到后端返回的数据中
-      Object.keys(data).forEach((key) => {
-        res.data[key] = Object.assign({}, data[key], res.data[key]);
-      });
-      if (isEmptyResult(res.data)) {
+      merge(res, data)
+      if (isEmptyResult(res)) {
         return Promise.reject(new Error('locale empty !!'))
       }
       return res;
     })
   }
   /**
+   * 深度合并
+   * @param d1 
+   * @param d2 
+   */
+  // deepMerge(d1, d2) {
+  //   let res = {};
+  //   Object.keys(d1).forEach((key) => {
+  //     res[key] = Object.assign({}, d1[key], d2[key]);
+  //   });
+  //   return res;
+  // }
+  /**
    * 主方法
    * @param locale 语种
    * @param callback 回调函数，用于订制自己触发的渲染逻辑
    */
   update(locale: string, callback: Function) {
-    let data = this.staticTranslateData[locale];
-    const cacheData = this.getCache(locale);
-    data = Object.assign({}, data, cacheData);
-
+    let staticData = this.staticTranslateData[locale];
+    const cacheData = this.getCache(locale) || {};
     // 使用静态数据和缓存数据的并集，触发第一次视图更新
-    callback({data}, 'first');
+    merge(cacheData, staticData);
+    callback(cacheData, 'first');
 
     // 返回静态和动态数据的合集
-    return this.getMergeTranslateData(locale).then((res: translateDataRes) => {
+    return this.getMergeTranslateData(locale).then((res: object) => {
       // 获取数据是否和动态数据不一致
-      if (res.data && !isEqual(res.data, cacheData)) {
+      if (res && !isEqual(res, cacheData)) {
         callback(res, 'second')
       }
     })

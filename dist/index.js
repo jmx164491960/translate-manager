@@ -1,27 +1,5 @@
-import Storage from './utils/localStorage';
-/**
- * 判断是否为falsy值/空数组/空对象
- * @param data
- * @returns {boolean}
- */
-function isEmptyResult(data) {
-    // Object.keys(data).length === 0
-    // 判断假值（除0外）和空数组/对象
-    if (!data && data !== 0 && data !== false) {
-        return true;
-    }
-    // 判断时间
-    if (data instanceof Date) {
-        return false;
-    }
-    if (Array.isArray(data) && data.length === 0) {
-        return true;
-    }
-    else if (Object.prototype.isPrototypeOf(data) && Object.keys(data).length === 0) {
-        return true;
-    }
-    return false;
-}
+import { isEmptyResult, jsonParse, isEqual } from './utils';
+import merge from 'lodash/merge';
 /**
  * 从前端缓存里获取国际化
  */
@@ -34,13 +12,42 @@ var TranslateManager = /** @class */ (function () {
         this.expireTime = params.expireTime || Infinity; // 前端缓存有效时间
         this.STORAGE_KEY = params.storageKey || 'TranslateManager';
         this.requestFn = params.requestFn;
-        this.staticTranslateData = params.staticTranslateData;
+        this.staticTranslateData = params.staticTranslateData || {};
     }
+    TranslateManager.prototype.setRequestFn = function (fn) {
+        this.requestFn = fn;
+    };
     /**
-     * 获取国际化数据的接口
-     * @param {Object} headers 请求参数
+     * 设置缓存
+     * @param {String} language
      */
-    TranslateManager.prototype.getRequestData = function (language) {
+    TranslateManager.prototype.setCache = function (language, data) {
+        // 请求完成后缓存
+        var storageData = jsonParse(localStorage.getItem(this.STORAGE_KEY)) || {};
+        storageData[language] = data;
+        storageData['time'] = new Date().getTime();
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(storageData));
+    };
+    /**
+     * 从缓存中读取
+     * @param language 语种
+     */
+    TranslateManager.prototype.getCache = function (language) {
+        var storageData = jsonParse(localStorage.getItem(this.STORAGE_KEY)) || {};
+        if (storageData && storageData['time'] && storageData[language]) {
+            var time = storageData['time'];
+            var now = new Date().getTime();
+            // 缓存只有两小时
+            if (now - time <= this.expireTime) {
+                return storageData[language] || null;
+            }
+        }
+        return null;
+    };
+    /**
+     * 获取后端的静态国际化数据
+     */
+    TranslateManager.prototype.getDynamicTranslateData = function (language) {
         var _this = this;
         if (!this.requestFn) {
             console.error('请先执行setRequestFn!');
@@ -51,56 +58,6 @@ var TranslateManager = /** @class */ (function () {
             return res;
         });
     };
-    TranslateManager.prototype.setRequestFn = function (fn) {
-        this.requestFn = fn;
-    };
-    /**
-     * 判断是否需要更新国际化。通常在使用缓存后判断
-     * @param {*} language
-     */
-    TranslateManager.prototype.isNeedUpdate = function (language) {
-        var storageData = Storage.getJsonData(this.STORAGE_KEY) || {};
-        var cacheData = storageData[language];
-        return this.getRequestData(language).then(function (res) {
-            if (JSON.stringify(res) === JSON.stringify(cacheData)) {
-                // console.log('不需要更新', res, cacheData);
-                return false;
-            }
-            else {
-                // console.log('需要更新');
-                return true;
-            }
-        });
-    };
-    /**
-     * 设置缓存
-     * @param {String} language
-     */
-    TranslateManager.prototype.setCache = function (language, data) {
-        // 请求完成后缓存
-        var storageData = Storage.getJsonData(this.STORAGE_KEY) || {};
-        storageData[language] = data;
-        storageData['time'] = new Date().getTime();
-        Storage.set(this.STORAGE_KEY, storageData);
-    };
-    /**
-     * 获取后端的静态国际化数据
-     */
-    TranslateManager.prototype.getDynamicTranslateData = function (language) {
-        var storageData = Storage.getJsonData(this.STORAGE_KEY);
-        // 有缓存就读取缓存
-        if (storageData && storageData['time'] && storageData[language]) {
-            var time = storageData['time'];
-            var now = new Date().getTime();
-            // 缓存只有两小时
-            if (now - time <= this.expireTime) {
-                if (storageData[language])
-                    storageData[language]['isCache'] = true; // 打上是否使用缓存的标志
-                return Promise.resolve(storageData[language]);
-            }
-        }
-        return this.getRequestData(language);
-    };
     /**
      * 获取前后端交集后的国际化数据
      * @param {*} language
@@ -109,49 +66,43 @@ var TranslateManager = /** @class */ (function () {
         var _this = this;
         // 没缓存就发起请求
         return this.getDynamicTranslateData(language).then(function (res) {
-            var data = _this.staticTranslateData[language];
-            if (!data) {
-                return Promise.reject();
-            }
+            var data = _this.staticTranslateData[language] || {};
             // 部分国际化写在了前端，把前端的国际化文件合并到后端返回的数据中
-            Object.keys(data).forEach(function (key) {
-                res.data[key] = Object.assign({}, data[key], res.data[key]);
-            });
+            merge(res, data);
+            if (isEmptyResult(res)) {
+                return Promise.reject(new Error('locale empty !!'));
+            }
             return res;
         });
     };
+    /**
+     * 深度合并
+     * @param d1
+     * @param d2
+     */
+    // deepMerge(d1, d2) {
+    //   let res = {};
+    //   Object.keys(d1).forEach((key) => {
+    //     res[key] = Object.assign({}, d1[key], d2[key]);
+    //   });
+    //   return res;
+    // }
     /**
      * 主方法
      * @param locale 语种
      * @param callback 回调函数，用于订制自己触发的渲染逻辑
      */
     TranslateManager.prototype.update = function (locale, callback) {
-        var _this = this;
+        var staticData = this.staticTranslateData[locale];
+        var cacheData = this.getCache(locale) || {};
+        // 使用静态数据和缓存数据的并集，触发第一次视图更新
+        merge(cacheData, staticData);
+        callback(cacheData, 'first');
         // 返回静态和动态数据的合集
-        return this.getMergeTranslateData(locale)
-            .then(function (res) {
-            if (!isEmptyResult(res.data)) {
-                // 首次更新
-                callback(res, 'first');
-                // 是否使用缓存
-                if (res.isCache) {
-                    _this.isNeedUpdate(locale).then(function (needUpdate) {
-                        // 是否需要更新
-                        if (!needUpdate) {
-                            return;
-                        }
-                        _this.getMergeTranslateData(locale).then(function (res) {
-                            // 缓存更新进行中
-                            if (!isEmptyResult(res.data)) {
-                                // 第二次更新
-                                callback(res, 'second');
-                            }
-                        });
-                    });
-                }
-            }
-            else {
-                return Promise.reject(new Error('locale empty !!'));
+        return this.getMergeTranslateData(locale).then(function (res) {
+            // 获取数据是否和动态数据不一致
+            if (res && !isEqual(res, cacheData)) {
+                callback(res, 'second');
             }
         });
     };

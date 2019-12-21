@@ -10,7 +10,7 @@
 			"es2015"
 			// "es2015.promise"
 		],
-		// "declaration": true, // 生成 `.d.ts` 文件
+		"declaration": true, // 生成 `.d.ts` 文件
 		"resolveJsonModule": true, 
 		"esModuleInterop": true,
 		"target": "es5",
@@ -18,7 +18,7 @@
 		"moduleResolution": "node",
 		"isolatedModules": false,
 		"noUnusedLocals": true,
-		"allowJs": true,
+		// "allowJs": true,
 		"experimentalDecorators": true,
 		"suppressImplicitAnyIndexErrors": true,
 		"outDir": "./dist",

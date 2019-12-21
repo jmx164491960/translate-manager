@@ -27,6 +27,10 @@ export function isEmptyResult(data: any): Boolean {
   return false;
 }
 
+export function isEqual(d1: object, d2: object) {
+  return JSON.stringify(d1) === JSON.stringify(d2);
+}
+
 
 export function jsonParse(str: string): object {
   try {

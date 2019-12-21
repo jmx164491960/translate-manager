@@ -29,9 +29,8 @@ export default {
   },
   created() {
     this.language = window.language;
-
-    this.translateData = staticTranslateData[this.language]['namespace1'];
-    console.log('staticTranslateData[this.language]:', staticTranslateData[this.language]);
+    delete localStorage.translateManagerDemo
+    
     translateManager.update(this.language, (res) => {
       this.translateData = res.data['namespace1'];
     })

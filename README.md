@@ -8,17 +8,21 @@
 
 本工具适用于使用动态数据或者同时使用两者用的场景。该工具可以帮你整合数据，并作缓存。在需要国际化切换时，你只需要传入对应的语种。剩下的工作由工具帮你完成。
 
-ps: 当存在缓存时，callback会可能先后执行两次，这是为了更好的用户体验：触发国际化切换直接使用缓存数据更新，此为第一次；第二次则是接口返回后，工具对比缓存发现不一样，再刷新一次。第二次刷新在callback传入isCache用于使用时区别
+ps: 当存在缓存时，callback会可能先后执行两次，这是为了更好的用户体验：触发国际化切换直接使用缓存数据更新，此为第一次；第二次则是接口返回后，工具对比缓存发现不一样，再刷新一次。
 
 
 ### Install
 
-npm install LocaleManager -S
+npm install TranslateManager -S
+
+### 调用例子
+
+npm run example
 
 ### Quick Start
 
 ```
-const localeManager = new LocaleManager({
+const translateManager = new TranslateManager({
     // 选填: 静态国际化数据
     staticLocaleData: {
         en: {
@@ -41,7 +45,7 @@ const localeManager = new LocaleManager({
 * lang: 语种
 * callback 回调方法
 **/
-localeManager.start(lang, (res) => {
+translateManager.update(lang, (res) => {
     // res是可以直接使用的国际化数据，结合自己对应的业务要求编写代码
     // 业务代码...
 });
@@ -52,10 +56,6 @@ constructor
 | 参数名 | 是否必填 | 说明 | 默认 |
 | :----: | :----: | :----: | :----: |
 | requestFn | 是 | 获取动态国际化数据的方法 | - |
-| staticLocaleData | 否 | 静态国际化数据 | {} |
+| staticTranslateData | 否 | 静态国际化数据 | {} |
 | expireTime | 否 | 前端缓存时间 | Infinity |
 | storageKey | 否 | 缓存locastorage对应的名字 | LocaleGetter |
-
-### 例子
-
-npm run example

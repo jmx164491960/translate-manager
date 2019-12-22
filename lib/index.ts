@@ -95,18 +95,6 @@ export default class TranslateManager {
     })
   }
   /**
-   * 深度合并
-   * @param d1 
-   * @param d2 
-   */
-  // deepMerge(d1, d2) {
-  //   let res = {};
-  //   Object.keys(d1).forEach((key) => {
-  //     res[key] = Object.assign({}, d1[key], d2[key]);
-  //   });
-  //   return res;
-  // }
-  /**
    * 主方法
    * @param locale 语种
    * @param callback 回调函数，用于订制自己触发的渲染逻辑
